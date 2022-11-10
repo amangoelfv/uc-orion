@@ -118,9 +118,9 @@ export const itemMapper = ([key, value], idx) => {
   const key2 = key.split("-")[0];
   switch (key2) {
     case "button":
-      return <Button key={idx} {...value}>{value.text}</Button>;
+      return <Button key={idx} {...value} />;
     case "text":
-      return <Text key={idx} {...value}>{value.value}</Text>;
+      return <Text key={idx} {...value} />;
     case "image":
       return <Image key={idx} {...value} />
     case "space":
