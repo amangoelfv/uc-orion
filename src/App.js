@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import Editor from 'react-simple-code-editor';
 import './App.css';
 import Highlight, { defaultProps } from 'prism-react-renderer'
@@ -8,6 +8,7 @@ import { itemMapper, notify, sampleData } from './utils';
 import { sampleUCPage } from './data';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import MainRenderer from './MainRenderer';
 function App() {
   const highlight = code => (
     <Highlight {...defaultProps} theme={theme} code={code} language="javascript">
@@ -22,25 +23,7 @@ function App() {
       )}
     </Highlight>
   )
-  const renderWidgets = () => {
-    try {
-      const parsedCode = JSON.parse(`${executableCode}`);
-      return (
-        <div>
-          {Object.entries(parsedCode).map(itemMapper)}
-        </div>
-      )
-    } catch (e) {
-      console.log(e)
-      if (!executableCode) {
-        return <div>No Input Given</div>
-      }
-      return (
-        <div>Syntax Error: Please ensure it is a JSON Object. All keys & values are in double quotes & there are no trailing commas for last key of the data</div>
-      )
-    }
-
-  }
+  
 
   const getSampleObject = (callb, key) => {
     let data = callb();
@@ -61,20 +44,40 @@ function App() {
       "height": "300px"
     }
 }`);
-  const [executableCode, setExecutableCode] = React.useState(`{
-    "text-1": {
-      "value": "Hello Students!",
-      "fontWeight": "bold",
-      "fontSize": "24px"
-    },
-    "space-1": {
-      "height": "32px"
-    },
-    "image-1": {
-      "src": "https://testbytes.technoallianceindia.com/wp-content/uploads/2019/06/Untitled-17-1-300x300.png",
-      "height": "300px"
+
+  const [templatesData, setTemplatesData] = useState({});
+  const [error, setError] = useState('');
+//   const [executableCode, setExecutableCode] = React.useState(`{
+//     "text-1": {
+//       "value": "Hello Students!",
+//       "fontWeight": "bold",
+//       "fontSize": "24px"
+//     },
+//     "space-1": {
+//       "height": "32px"
+//     },
+//     "image-1": {
+//       "src": "https://testbytes.technoallianceindia.com/wp-content/uploads/2019/06/Untitled-17-1-300x300.png",
+//       "height": "300px"
+//     }
+// }`);
+
+  const resetTemplateData = (code) => {
+    setError('');
+    try{
+      const data = JSON.parse(code);
+      console.log('templatesData', data);
+      setTemplatesData(data);
+    } catch(e) {
+      console.log(e)
+      if (!code) {
+        setError('No Input Given');
+        return ;
+      }
+      setError('Syntax Error: Please ensure it is a JSON Object. All keys & values are in double quotes & there are no trailing commas for last key of the data')
     }
-}`);
+  }
+
   return (
     <div className="App">
               <ToastContainer />
@@ -90,7 +93,7 @@ function App() {
           {Object.keys(sampleData).map((key) => <Button action={() => getSampleObject(sampleData[key], key)} text={key} />)}
 
           <Button action={() => {
-            setExecutableCode(code);
+            resetTemplateData(code);
           }} color={"#999"} text={"Run code"} />
         </div>
         <Editor
@@ -117,9 +120,10 @@ function App() {
           }}
         />
       </div>
-      <div className='output-screen'>
-        {renderWidgets()}
-      </div>
+      {error ? <div>{error}</div>
+        :
+        <MainRenderer templatesList={Object.keys(templatesData)} state={templatesData} />
+      }
       {/** <Space height={20} color={"#777"} />
         <Image src={"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"} />
         
